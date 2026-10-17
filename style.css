@@ -1,0 +1,435 @@
+/* =========================================
+   VARIABLES DE TEMA
+   (para cambiar colores, edita solo esta parte)
+   ========================================= */
+#body {
+    --bg: #eef2f9;
+    --card: #ffffff;
+    --campo: #f6f8fc;
+    --texto: #14203a;
+    --suave: #5b6b88;
+    --borde: #d3dbea;
+    --burbuja: #e6ebf5;
+    --azul: #2d6cdf;
+    --verde: #178a3e;
+    --rojo: #d93025;
+    --acento-texto: #2d6cdf;
+    --radio: 12px;
+}
+
+#body.dark {
+    --bg: #060c1a;
+    --card: #0e1730;
+    --campo: #0a1226;
+    --texto: #e8eefc;
+    --suave: #9aa9c8;
+    --borde: #22305a;
+    --burbuja: #1a2748;
+    --acento-texto: #7aa7ff;
+    color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+/* FONDO */
+#body {
+    background-color: var(--bg);
+    color: var(--texto);
+    margin: 0 auto;
+    max-width: 440px;
+    padding: 64px 16px 32px;
+    font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.45;
+    text-align: center;
+    transition: background-color 0.25s, color 0.25s;
+}
+
+/* TEXTOS */
+h1,
+h2 {
+    margin: 0 0 18px;
+    line-height: 1.2;
+}
+
+h1 { font-size: 1.85rem; }
+h2 { font-size: 1.35rem; }
+
+.text {
+    text-align: center;
+}
+
+#user {
+    margin-bottom: 4px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--suave);
+}
+
+#nombreContacto {
+    margin: 16px 0 8px;
+}
+
+p {
+    margin: 0 0 14px;
+}
+
+/* CONTENEDORES (cada pantalla es una tarjeta) */
+.inicio,
+.login,
+.register,
+#home,
+#ChatDiv,
+#contactos,
+#Chat,
+#notice {
+    text-align: center;
+}
+
+.inicio,
+.login,
+.register,
+#home,
+#ChatDiv,
+#notice {
+    background-color: var(--card);
+    border: 1px solid var(--borde);
+    border-radius: 18px;
+    padding: 28px 22px;
+    animation: aparecer 0.22s ease-out;
+    transition: background-color 0.25s, border-color 0.25s;
+}
+
+@keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* PANTALLAS OCULTAS */
+.login,
+.register,
+#home,
+#ChatDiv,
+#contactos,
+#Chat,
+#notice {
+    display: none;
+}
+
+/* DIVISIONES */
+.div {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* INPUTS */
+.input,
+#mensajeTexto {
+    display: block;
+    width: 100%;
+    padding: 12px 14px;
+    margin: 8px 0;
+    background-color: var(--campo);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    outline: none;
+    font: inherit;
+    font-size: 1rem;
+    text-align: left;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.input::placeholder,
+#mensajeTexto::placeholder {
+    color: var(--suave);
+    opacity: 0.8;
+}
+
+.input:focus,
+#mensajeTexto:focus {
+    border-color: var(--azul);
+    box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.25);
+}
+
+.input[type="date"] {
+    min-height: 48px;
+}
+
+/* CLASES DE INPUTS */
+.fecha,
+.name,
+.email,
+.password {
+    width: 100%;
+}
+
+/* BOTONES */
+.btn {
+    display: block;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px 18px;
+    border: none;
+    border-radius: var(--radio);
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.1s, background-color 0.15s;
+}
+
+.btn:hover {
+    filter: brightness(1.08);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* EFECTO AL PULSAR */
+.btn:active {
+    transform: scale(0.98);
+}
+
+/* FOCO VISIBLE (teclado) */
+.btn:focus-visible,
+#listaContactos button:focus-visible {
+    outline: 3px solid var(--acento-texto);
+    outline-offset: 2px;
+}
+
+/* COLORES */
+.uno {
+    background-color: var(--azul);
+}
+
+.dos {
+    background-color: var(--verde);
+}
+
+.tres {
+    background-color: var(--verde);
+}
+
+.cuatro {
+    background-color: var(--azul);
+    width: 50%;
+}
+
+.cinco {
+    background-color: #8a3fd1;
+    width: 50%;
+}
+
+.seis {
+    width: auto;
+}
+
+.siete {
+    background-color: var(--verde);
+}
+
+/* botón secundario (con borde) */
+.ocho {
+    width: 100%;
+    background-color: transparent;
+    color: var(--acento-texto);
+    border: 1.5px solid var(--acento-texto);
+}
+
+.ocho:hover {
+    filter: none;
+    background-color: rgba(45, 108, 223, 0.12);
+}
+
+.nueve {
+    background-color: var(--rojo);
+}
+
+/* BOTÓN DE TEMA */
+#Cambiar {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+    display: block;
+    width: auto;
+    margin: 0;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    background-color: var(--card);
+    color: var(--texto);
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+}
+
+/* LISTA DE CONTACTOS */
+#listaContactos {
+    margin-bottom: 8px;
+    color: var(--suave);
+}
+
+#listaContactos button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    margin: 8px 0;
+    padding: 12px 14px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: var(--campo);
+    color: var(--texto);
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+}
+
+#listaContactos button::before {
+    content: attr(data-inicial);
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--azul);
+    color: white;
+    font-weight: 800;
+}
+
+#listaContactos button:hover {
+    border-color: var(--azul);
+}
+
+#listaContactos button:active {
+    transform: scale(0.99);
+}
+
+/* MENSAJES */
+#mensajes {
+    height: 55vh;
+    min-height: 260px;
+    max-height: 460px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: var(--campo);
+    text-align: left;
+}
+
+#mensajes:empty::before {
+    content: "Aún no hay mensajes. Escribe el primero.";
+    display: block;
+    margin-top: 24px;
+    color: var(--suave);
+    text-align: center;
+}
+
+/* CADA MENSAJE */
+#mensajes p {
+    width: fit-content;
+    max-width: 82%;
+    margin: 6px 0;
+    padding: 9px 13px;
+    border-radius: 16px 16px 16px 4px;
+    background-color: var(--burbuja);
+    color: var(--texto);
+    overflow-wrap: anywhere;
+}
+
+#mensajes p.mio {
+    margin-left: auto;
+    border-radius: 16px 16px 4px 16px;
+    background-color: var(--azul);
+    color: white;
+}
+
+/* ESCRIBIR MENSAJES */
+#mensajeTexto {
+    display: inline-block;
+    width: calc(100% - 110px);
+    margin: 0;
+    vertical-align: middle;
+}
+
+/* BOTÓN ENVIAR */
+.enviar {
+    display: inline-block;
+    width: 92px;
+    margin: 0 0 0 4px;
+    padding: 12px 0;
+    vertical-align: middle;
+    font-size: 1rem;
+    background-color: var(--azul);
+}
+
+/* PIE */
+.t {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--suave);
+    font-size: 0.8rem;
+}
+
+.t p {
+    margin: 0;
+}
+
+/* MÓVILES PEQUEÑOS */
+@media (max-width: 400px) {
+    #body {
+        padding: 60px 12px 24px;
+    }
+
+    .inicio,
+    .login,
+    .register,
+    #home,
+    #ChatDiv,
+    #notice {
+        padding: 22px 16px;
+    }
+
+    h1 {
+        font-size: 1.6rem;
+    }
+
+    .btn {
+        font-size: 1rem;
+    }
+
+    #mensajes {
+        min-height: 220px;
+    }
+}
+
+/* RESPETAR "REDUCIR MOVIMIENTO" */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

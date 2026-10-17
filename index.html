@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Proyect</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2d6cdf">
+    <link rel="icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="body">
+    <button id="Cambiar" class="btn seis" onclick="Estilo()">
+            Modo oscuro
+        </button>
+
+    <!-- INICIO -->
+    <div id="inicio" class="inicio">
+        <h1 class="text">Bienvenido</h1>
+
+        
+
+        <button class="btn uno" onclick="AbrirRegister()">
+            Registrar
+        </button>
+
+        <button class="btn dos" onclick="AbrirLogin()">
+            Login
+        </button>
+    </div>
+
+
+    <!-- LOGIN -->
+    <div id="login" class="login">
+        <h1 class="text">Iniciar sesión</h1>
+
+        <input
+            id="InputNombre"
+            class="input name"
+            type="email"
+            placeholder="Correo electrónico"
+            autocomplete="email"
+        >
+
+        <input
+            id="InputContraseña"
+            class="input password"
+            type="password"
+            placeholder="Contraseña"
+            autocomplete="current-password"
+        >
+
+        <button class="btn siete" onclick="login()">
+            Entrar
+        </button>
+
+        <button class="btn ocho" onclick="AbrirRegister()">
+            Crear cuenta
+        </button>
+    </div>
+
+
+    <!-- REGISTRO -->
+    <div id="register" class="register">
+        <h1 class="text">Crear cuenta</h1>
+
+        <input
+            id="InputFecha"
+            class="input fecha"
+            type="date"
+        >
+
+        <input
+            id="InputName"
+            class="input name"
+            type="text"
+            placeholder="Nickname"
+            maxlength="30"
+            autocomplete="nickname"
+        >
+
+        <input
+            id="InputEmail"
+            class="input email"
+            type="email"
+            placeholder="Correo electrónico"
+            autocomplete="email"
+        >
+
+        <input
+            id="InputPassword"
+            class="input password"
+            type="password"
+            placeholder="Contraseña (mínimo 6 caracteres)"
+            autocomplete="new-password"
+        >
+
+        <button class="btn tres" onclick="registrar()">
+            Registrar
+        </button>
+
+        <button class="btn ocho" onclick="AbrirLogin()">
+            Ya tengo una cuenta
+        </button>
+    </div>
+
+
+    <!-- HOME -->
+    <div id="home">
+        <h2 id="user">Usuario</h2>
+        <h1 class="text">Bienvenido</h1>
+
+        <button class="btn uno" onclick="BtnChat()">
+            Chats
+        </button>
+
+        <button class="btn uno" onclick="BtnNotice()">
+            Avisos
+        </button>
+
+        <button class="btn nueve" onclick="cerrarSesion()">
+            Cerrar sesión
+        </button>
+    </div>
+
+
+    <!-- CHATS -->
+    <div id="ChatDiv">
+
+        <!-- CONTACTOS -->
+        <div id="contactos">
+            <h2 class="text">Contactos</h2>
+
+            <div id="listaContactos"></div>
+
+            <button class="btn ocho" onclick="volverHome()">
+                Volver al inicio
+            </button>
+        </div>
+
+        <!-- CONVERSACIÓN -->
+        <div id="Chat">
+            <button class="btn ocho" onclick="ChatSalir()">
+                ← Contactos
+            </button>
+
+            <h2 id="nombreContacto">Conversación</h2>
+
+            <div id="mensajes"></div>
+
+            <input
+                id="mensajeTexto"
+                type="text"
+                placeholder="Escribe un mensaje..."
+                maxlength="5000"
+                autocomplete="off"
+            >
+
+            <button class="btn enviar" onclick="enviarMensaje()">
+                Enviar
+            </button>
+        </div>
+
+    </div>
+
+
+    <!-- AVISOS -->
+    <div id="notice">
+        <h2 class="text">Avisos</h2>
+
+        <p>Bienvenido a la aplicación.</p>
+
+        <button class="btn ocho" onclick="BtnNotice()">
+            Volver
+        </button>
+    </div>
+<div class="t">
+  <p>Desarrollada por Mister, v0.1 beta</p>
+</div>
+
+    <!-- SUPABASE Y app.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+    <script>
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("sw.js");
+            });
+        }
+    </script>
+
+</body>
+</html>
