@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Proyect</title>
+    <title>PKview</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -123,6 +123,10 @@
             Avisos
         </button>
 
+        <button id="BtnPush" class="btn ocho" onclick="activarNotificaciones()" style="display: none;">
+            Activar notificaciones
+        </button>
+
         <button class="btn nueve" onclick="cerrarSesion()">
             Cerrar sesión
         </button>
@@ -172,7 +176,10 @@
     <!-- AVISOS -->
     <div id="notice">
         <h2 class="text">Avisos</h2>
-
+       <div class="anuncio">
+<h1>Update 0.2 beta</h1>
+<p>mejora de estilo y diseño y agrego de notificaciónes</p>
+</div>
         <p>Bienvenido a la aplicación.</p>
 
         <button class="btn ocho" onclick="BtnNotice()">
@@ -180,7 +187,7 @@
         </button>
     </div>
 <div class="t">
-  <p>Desarrollada por Mister, v0.1 beta</p>
+  <p>Desarrollada por Mister, v0.2 beta</p>
 </div>
 
     <!-- SUPABASE Y app.js -->

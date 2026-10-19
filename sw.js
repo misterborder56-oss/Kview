@@ -1,6 +1,6 @@
 // Service worker: guarda la "carcasa" de la app para que abra rápido y sin conexión.
 // Supabase (login, contactos, mensajes) siempre va por internet.
-const VERSION = "proyect-v1";
+const VERSION = "proyect-v2";
 const ARCHIVOS = [
     "./",
     "./index.html",
@@ -48,5 +48,50 @@ self.addEventListener("fetch", evento => {
                 return respuesta;
             })
             .catch(() => caches.match(evento.request))
+    );
+});
+
+// ===================================
+// NOTIFICACIONES PUSH
+// ===================================
+
+self.addEventListener("push", evento => {
+    let datos = {};
+
+    try {
+        datos = evento.data ? evento.data.json() : {};
+    } catch (e) {
+        datos = { cuerpo: evento.data ? evento.data.text() : "" };
+    }
+
+    evento.waitUntil(
+        self.registration.showNotification(datos.titulo || "Nuevo mensaje", {
+            body: datos.cuerpo || "",
+            icon: "icon-192.png",
+            tag: datos.tag || "mensaje",
+            renotify: true,
+            data: { url: datos.url || "./index.html" }
+        })
+    );
+});
+
+self.addEventListener("notificationclick", evento => {
+    evento.notification.close();
+
+    const destino = new URL(
+        evento.notification.data?.url || "./index.html",
+        self.registration.scope
+    ).href;
+
+    evento.waitUntil(
+        clients
+            .matchAll({ type: "window", includeUncontrolled: true })
+            .then(ventanas => {
+                for (const ventana of ventanas) {
+                    if ("focus" in ventana) return ventana.focus();
+                }
+
+                return clients.openWindow(destino);
+            })
     );
 });

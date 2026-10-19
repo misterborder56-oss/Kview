@@ -433,3 +433,10 @@ p {
         transition: none !important;
     }
 }
+
+
+.anuncio{
+    background-color: var(--campo);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+}

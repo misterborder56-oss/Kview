@@ -207,6 +207,132 @@ async function login() {
 
 
 // ===================================
+// NOTIFICACIONES PUSH
+// ===================================
+
+// Clave PÚBLICA (la privada va solo en Supabase, nunca aquí)
+const VAPID_PUBLIC_KEY = "BNyuxXMh90D5YRJQe52mAGHx7PIINqXtpYVYkZvrSmx8Rd-t20pDCbDDjgXJK985Gtiiq2ir6crPLlcbeozVEtA";
+
+function urlBase64ToUint8Array(texto) {
+    const relleno = "=".repeat((4 - (texto.length % 4)) % 4);
+    const base64 = (texto + relleno).replace(/-/g, "+").replace(/_/g, "/");
+    const crudo = atob(base64);
+
+    return Uint8Array.from(crudo, caracter => caracter.charCodeAt(0));
+}
+
+function notificacionesDisponibles() {
+    return (
+        "serviceWorker" in navigator &&
+        "PushManager" in window &&
+        "Notification" in window
+    );
+}
+
+// Crea (o reutiliza) la suscripción de este teléfono y la guarda en Supabase
+async function suscribirPush() {
+    const registro = await navigator.serviceWorker.ready;
+
+    let suscripcion = await registro.pushManager.getSubscription();
+
+    if (!suscripcion) {
+        suscripcion = await registro.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+        });
+    }
+
+    const datos = suscripcion.toJSON();
+
+    const { error } = await base.rpc("registrar_push", {
+        p_endpoint: datos.endpoint,
+        p_p256dh: datos.keys.p256dh,
+        p_auth: datos.keys.auth
+    });
+
+    if (error) throw error;
+}
+
+// Botón "Activar notificaciones"
+async function activarNotificaciones() {
+    if (!usuarioActual) {
+        alert("Primero inicia sesión");
+        return;
+    }
+
+    if (!notificacionesDisponibles()) {
+        alert("Este navegador no admite notificaciones.");
+        return;
+    }
+
+    const permiso = await Notification.requestPermission();
+
+    if (permiso !== "granted") {
+        alert("No diste permiso. Puedes activarlo en los ajustes del navegador.");
+        return;
+    }
+
+    try {
+        await suscribirPush();
+        alert("Notificaciones activadas");
+    } catch (error) {
+        console.error("Error al activar notificaciones:", error);
+        alert("No se pudieron activar las notificaciones.");
+    }
+
+    actualizarBotonNotificaciones();
+}
+
+// Oculta el botón si ya no hace falta
+function actualizarBotonNotificaciones() {
+    const boton = document.getElementById("BtnPush");
+
+    if (!boton) return;
+
+    const yaActivas =
+        notificacionesDisponibles() && Notification.permission === "granted";
+
+    boton.style.display =
+        notificacionesDisponibles() && !yaActivas ? "" : "none";
+}
+
+// Al iniciar sesión: si ya había permiso, vuelve a vincular este teléfono a la cuenta
+async function sincronizarPush() {
+    actualizarBotonNotificaciones();
+
+    if (
+        notificacionesDisponibles() &&
+        Notification.permission === "granted"
+    ) {
+        try {
+            await suscribirPush();
+        } catch (error) {
+            console.error("Error al sincronizar push:", error);
+        }
+    }
+}
+
+// Al cerrar sesión: este teléfono deja de recibir avisos de esa cuenta
+async function olvidarPush() {
+    if (!notificacionesDisponibles()) return;
+
+    try {
+        const registro = await navigator.serviceWorker.ready;
+        const suscripcion = await registro.pushManager.getSubscription();
+
+        if (suscripcion) {
+            await base
+                .from("push_suscripciones")
+                .delete()
+                .eq("endpoint", suscripcion.endpoint);
+        }
+    } catch (error) {
+        console.error("Error al olvidar push:", error);
+    }
+}
+
+
+// ===================================
 // MOSTRAR LA CUENTA CONECTADA
 // ===================================
 
@@ -232,6 +358,8 @@ async function mostrarHome(user) {
         user.user_metadata?.nickname ||
         user.email ||
         "Usuario";
+
+    sincronizarPush();
 }
 
 
@@ -263,6 +391,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function cerrarSesion() {
     if (!confirm("¿Seguro que quieres cerrar sesión?")) return;
+
+    await olvidarPush();
 
     const { error } = await base.auth.signOut();
 
