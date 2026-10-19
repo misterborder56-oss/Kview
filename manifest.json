@@ -1,8 +1,8 @@
 {
-  "id": "./",
-  "name": "Proyect",
-  "short_name": "Proyect",
-  "description": "Chat privado con contactos y avisos",
+  "id": "pkview",
+  "name": "PKview",
+  "short_name": "pkv",
+  "description": "habla conoce personas y diviértete",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
