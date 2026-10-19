@@ -9,6 +9,8 @@ const base = window.supabase.createClient(
 
 let usuarioActual = null;
 let contactoActual = null;
+let perfilActual = null;
+let contactosIds = new Set();
 
 
 // ===================================
@@ -32,7 +34,9 @@ function ocultarPantallas() {
         "ChatDiv",
         "contactos",
         "Chat",
-        "notice"
+        "notice",
+        "publicaciones",
+        "ajustes"
     ];
 
     pantallas.forEach(id => cerrar(id));
@@ -56,8 +60,9 @@ function AbrirLogin() {
 }
 
 function volverHome() {
-    cerrar("ChatDiv");
-    cerrar("notice");
+    contactoActual = null;
+
+    ocultarPantallas();
     abrir("home");
 }
 
@@ -65,11 +70,9 @@ function BtnNotice() {
     const notice = document.getElementById("notice");
 
     if (notice.style.display === "block") {
-        cerrar("notice");
-        abrir("home");
+        volverHome();
     } else {
-        cerrar("home");
-        cerrar("ChatDiv");
+        ocultarPantallas();
         abrir("notice");
     }
 }
@@ -345,7 +348,7 @@ async function mostrarHome(user) {
 
     const { data, error } = await base
         .from("perfiles")
-        .select("nickname")
+        .select("nickname, avatar_path")
         .eq("id", user.id)
         .maybeSingle();
 
@@ -353,11 +356,16 @@ async function mostrarHome(user) {
         console.error("Error al cargar perfil:", error);
     }
 
-    document.getElementById("user").textContent =
-        data?.nickname ||
-        user.user_metadata?.nickname ||
-        user.email ||
-        "Usuario";
+    perfilActual = {
+        nickname:
+            data?.nickname ||
+            user.user_metadata?.nickname ||
+            user.email ||
+            "Usuario",
+        avatar_path: data?.avatar_path || null
+    };
+
+    refrescarPerfilEnPantalla();
 
     sincronizarPush();
 }
@@ -404,9 +412,219 @@ async function cerrarSesion() {
 
     usuarioActual = null;
     contactoActual = null;
+    perfilActual = null;
+    contactosIds = new Set();
 
     ocultarPantallas();
     abrir("inicio");
+}
+
+
+// ===================================
+// UTILIDADES
+// ===================================
+
+function el(etiqueta, clase, texto) {
+    const nodo = document.createElement(etiqueta);
+
+    if (clase) nodo.className = clase;
+    if (texto !== undefined && texto !== null) nodo.textContent = texto;
+
+    return nodo;
+}
+
+function inicialDe(nombre) {
+    return Array.from(nombre || "?")[0]?.toUpperCase() || "?";
+}
+
+function urlPublica(bucket, ruta) {
+    return base.storage.from(bucket).getPublicUrl(ruta).data.publicUrl;
+}
+
+// Pone la foto de perfil (o la inicial) dentro de un elemento
+function pintarAvatar(elemento, nickname, avatarPath) {
+    elemento.replaceChildren();
+
+    if (avatarPath) {
+        const img = document.createElement("img");
+
+        img.alt = "";
+        img.loading = "lazy";
+        img.src = urlPublica("avatares", avatarPath);
+
+        img.addEventListener("error", () => {
+            elemento.replaceChildren(
+                document.createTextNode(inicialDe(nickname))
+            );
+        });
+
+        elemento.appendChild(img);
+    } else {
+        elemento.textContent = inicialDe(nickname);
+    }
+}
+
+function crearAvatar(nickname, avatarPath, clase) {
+    const avatar = el("div", "avatar " + (clase || ""));
+
+    pintarAvatar(avatar, nickname, avatarPath);
+
+    return avatar;
+}
+
+function fechaCorta(iso) {
+    return new Date(iso).toLocaleDateString("es", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+    });
+}
+
+function horaCorta(iso) {
+    return new Date(iso).toLocaleTimeString("es", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+// Convierte los links http(s) de un texto en enlaces pulsables (sin usar innerHTML)
+function textoConLinks(contenedor, texto) {
+    const regex = /(https?:\/\/[^\s<>"']+)/g;
+    let ultimo = 0;
+
+    for (const coincidencia of texto.matchAll(regex)) {
+        let url = coincidencia[0];
+        const inicio = coincidencia.index;
+
+        const sobrante = url.match(/[.,;:!?)\]]+$/);
+        if (sobrante) url = url.slice(0, -sobrante[0].length);
+
+        try {
+            new URL(url);
+        } catch (e) {
+            continue;
+        }
+
+        if (inicio > ultimo) {
+            contenedor.appendChild(
+                document.createTextNode(texto.slice(ultimo, inicio))
+            );
+        }
+
+        const enlace = document.createElement("a");
+
+        enlace.href = url;
+        enlace.textContent = url;
+        enlace.target = "_blank";
+        enlace.rel = "noopener noreferrer nofollow";
+
+        contenedor.appendChild(enlace);
+
+        ultimo = inicio + url.length;
+    }
+
+    if (ultimo < texto.length) {
+        contenedor.appendChild(
+            document.createTextNode(texto.slice(ultimo))
+        );
+    }
+}
+
+// Reduce la imagen antes de subirla (ahorra datos y espacio)
+function comprimirImagen(archivo, maxLado, calidad) {
+    return new Promise((resolve, reject) => {
+        if (!archivo.type.startsWith("image/")) {
+            reject(new Error("El archivo no es una imagen"));
+            return;
+        }
+
+        const LIMITE = 5 * 1024 * 1024;
+
+        // Los GIF se suben tal cual para no perder la animación
+        if (archivo.type === "image/gif") {
+            if (archivo.size > LIMITE) {
+                reject(new Error("La imagen pesa más de 5 MB"));
+            } else {
+                resolve(archivo);
+            }
+            return;
+        }
+
+        const url = URL.createObjectURL(archivo);
+        const img = new Image();
+
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+
+            const escala = Math.min(1, maxLado / Math.max(img.width, img.height));
+            const canvas = document.createElement("canvas");
+
+            canvas.width = Math.max(1, Math.round(img.width * escala));
+            canvas.height = Math.max(1, Math.round(img.height * escala));
+
+            const ctx = canvas.getContext("2d");
+
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                if (!blob) {
+                    reject(new Error("No se pudo procesar la imagen"));
+                } else if (blob.size > LIMITE) {
+                    reject(new Error("La imagen pesa más de 5 MB"));
+                } else {
+                    resolve(blob);
+                }
+            }, "image/jpeg", calidad);
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(url);
+            reject(new Error("No se pudo leer la imagen"));
+        };
+
+        img.src = url;
+    });
+}
+
+// Sube un archivo a la carpeta del usuario y devuelve su ruta
+async function subirImagen(bucket, blob) {
+    const extension = blob.type === "image/gif" ? "gif" : "jpg";
+    const azar = Math.random().toString(36).slice(2, 8);
+    const ruta = `${usuarioActual.id}/${Date.now()}-${azar}.${extension}`;
+
+    const { error } = await base.storage
+        .from(bucket)
+        .upload(ruta, blob, {
+            contentType: blob.type || "image/jpeg",
+            cacheControl: "31536000"
+        });
+
+    if (error) throw error;
+
+    return ruta;
+}
+
+function abrirVisor(url) {
+    document.getElementById("visorImg").src = url;
+    document.getElementById("visor").style.display = "flex";
+}
+
+function cerrarVisor() {
+    document.getElementById("visor").style.display = "none";
+    document.getElementById("visorImg").removeAttribute("src");
+}
+
+function mensajeDeError(error, porDefecto) {
+    if (
+        error?.code === "42501" ||
+        /row-level security/i.test(error?.message || "")
+    ) {
+        return "No tienes permiso para hacer esto.";
+    }
+
+    return porDefecto + (error?.message ? " (" + error.message + ")" : "");
 }
 
 
@@ -420,18 +638,18 @@ async function BtnChat() {
         return;
     }
 
-    cerrar("home");
-    cerrar("notice");
+    ocultarPantallas();
     abrir("ChatDiv");
     abrir("contactos");
-    cerrar("Chat");
+
+    document.getElementById("resultadosBusqueda").replaceChildren();
 
     await cargarContactos();
 }
 
 
 // ===================================
-// CARGAR CONTACTOS
+// CARGAR CONTACTOS (solo los que agregaste)
 // ===================================
 
 async function cargarContactos() {
@@ -440,33 +658,49 @@ async function cargarContactos() {
     const lista = document.getElementById("listaContactos");
 
     lista.replaceChildren();
-    lista.textContent = "Cargando contactos...";
+    lista.appendChild(el("p", "vacio", "Cargando contactos..."));
 
     const { data, error } = await base
-        .from("perfiles")
-        .select("id, nickname")
-        .neq("id", usuarioActual.id)
-        .order("nickname");
+        .from("contactos")
+        .select("contacto_id, perfiles!contactos_contacto_fk(nickname, avatar_path)")
+        .eq("user_id", usuarioActual.id);
 
     if (error) {
         console.error("Error de contactos:", error);
-        lista.textContent = "No se pudieron cargar los contactos.";
+        lista.replaceChildren(
+            el("p", "vacio", "No se pudieron cargar los contactos.")
+        );
         return;
     }
+
+    const contactos = (data || [])
+        .map(fila => ({
+            id: fila.contacto_id,
+            nickname: fila.perfiles?.nickname || "Usuario",
+            avatar_path: fila.perfiles?.avatar_path || null
+        }))
+        .sort((a, b) => a.nickname.localeCompare(b.nickname, "es"));
+
+    contactosIds = new Set(contactos.map(c => c.id));
 
     lista.replaceChildren();
 
-    if (!data || data.length === 0) {
-        lista.textContent = "Todavía no hay otros usuarios registrados.";
+    if (contactos.length === 0) {
+        lista.appendChild(el(
+            "p",
+            "vacio",
+            "Aún no tienes contactos. Busca un nickname arriba para agregar a alguien."
+        ));
         return;
     }
 
-    data.forEach(contacto => {
+    contactos.forEach(contacto => {
         const boton = document.createElement("button");
 
-        boton.textContent = contacto.nickname;
-        boton.dataset.inicial =
-            Array.from(contacto.nickname)[0]?.toUpperCase() || "?";
+        boton.appendChild(
+            crearAvatar(contacto.nickname, contacto.avatar_path, "peque")
+        );
+        boton.appendChild(el("span", "", contacto.nickname));
 
         boton.addEventListener("click", () => {
             abrirChatCon(contacto);
@@ -478,136 +712,85 @@ async function cargarContactos() {
 
 
 // ===================================
-// ABRIR CONVERSACIÓN
+// BUSCAR Y AGREGAR USUARIOS
 // ===================================
 
-async function abrirChatCon(contacto) {
-    contactoActual = contacto;
+async function buscarUsuario() {
+    const input = document.getElementById("InputBuscar");
+    const nickname = input.value.trim();
+    const zona = document.getElementById("resultadosBusqueda");
 
-    cerrar("contactos");
-    abrir("Chat");
+    if (!nickname) {
+        alert("Escribe el nickname que quieres buscar");
+        return;
+    }
 
-    document.getElementById("nombreContacto").textContent =
-        contacto.nickname;
+    zona.replaceChildren(el("p", "vacio", "Buscando..."));
 
-    document.getElementById("mensajes").replaceChildren();
+    const { data, error } = await base.rpc("buscar_usuario", {
+        p_nickname: nickname
+    });
 
-    await cargarMensajes();
+    if (error) {
+        console.error("Error de búsqueda:", error);
+        zona.replaceChildren(el("p", "vacio", "No se pudo buscar. Intenta de nuevo."));
+        return;
+    }
+
+    zona.replaceChildren();
+
+    if (!data || data.length === 0) {
+        zona.appendChild(el(
+            "p",
+            "vacio",
+            "No se encontró ningún usuario con ese nickname. Escríbelo tal cual."
+        ));
+        return;
+    }
+
+    data.forEach(usuario => {
+        const fila = el("div", "resultado");
+
+        fila.appendChild(crearAvatar(usuario.nickname, usuario.avatar_path, "peque"));
+        fila.appendChild(el("span", "", usuario.nickname));
+
+        if (contactosIds.has(usuario.id)) {
+            fila.appendChild(el("small", "", "Ya es tu contacto"));
+        } else {
+            const boton = el("button", "btn uno chico", "Agregar");
+
+            boton.addEventListener("click", () => {
+                agregarContacto(usuario.id, boton);
+            });
+
+            fila.appendChild(boton);
+        }
+
+        zona.appendChild(fila);
+    });
 }
 
+async function agregarContacto(idContacto, boton) {
+    boton.disabled = true;
 
-// ===================================
-// VOLVER A CONTACTOS
-// ===================================
+    const { error } = await base.rpc("agregar_contacto", {
+        p_contacto: idContacto
+    });
 
-async function ChatSalir() {
-    contactoActual = null;
+    if (error) {
+        console.error("Error al agregar contacto:", error);
+        alert("No se pudo agregar el contacto.");
+        boton.disabled = false;
+        return;
+    }
 
-    cerrar("Chat");
-    abrir("contactos");
+    document.getElementById("InputBuscar").value = "";
+    document.getElementById("resultadosBusqueda").replaceChildren();
 
     await cargarContactos();
 }
 
-
-// ===================================
-// CARGAR MENSAJES PRIVADOS
-// ===================================
-
-async function cargarMensajes() {
+async function eliminarContacto() {
     if (!usuarioActual || !contactoActual) return;
 
-    const { data, error } = await base
-        .from("mensajes")
-        .select("id, sender_id, receiver_id, contenido, creado_en")
-        .or(
-            `and(sender_id.eq.${usuarioActual.id},receiver_id.eq.${contactoActual.id}),` +
-            `and(sender_id.eq.${contactoActual.id},receiver_id.eq.${usuarioActual.id})`
-        )
-        .order("creado_en", { ascending: true });
-
-    if (error) {
-        console.error("Error al cargar mensajes:", error);
-        alert("No se pudieron cargar los mensajes.");
-        return;
-    }
-
-    const contenedor = document.getElementById("mensajes");
-    contenedor.replaceChildren();
-
-    for (const mensaje of data || []) {
-        const linea = document.createElement("p");
-
-        const esMio = mensaje.sender_id === usuarioActual.id;
-
-        linea.className = esMio ? "mio" : "otro";
-        linea.textContent = mensaje.contenido;
-        linea.title =
-            new Date(mensaje.creado_en).toLocaleString("es");
-
-        contenedor.appendChild(linea);
-    }
-
-    contenedor.scrollTop = contenedor.scrollHeight;
-}
-
-
-// ===================================
-// ENVIAR MENSAJE
-// ===================================
-
-async function enviarMensaje() {
-    if (!usuarioActual || !contactoActual) {
-        alert("Selecciona un contacto primero");
-        return;
-    }
-
-    const input = document.getElementById("mensajeTexto");
-    const contenido = input.value.trim();
-
-    if (!contenido) return;
-
-    if (contenido.length > 5000) {
-        alert("El mensaje es demasiado largo");
-        return;
-    }
-
-    const boton = document.querySelector("#Chat .enviar");
-    boton.disabled = true;
-
-    const { error } = await base
-        .from("mensajes")
-        .insert({
-            sender_id: usuarioActual.id,
-            receiver_id: contactoActual.id,
-            contenido: contenido
-        });
-
-    boton.disabled = false;
-
-    if (error) {
-        console.error("Error al enviar mensaje:", error);
-        alert("No se pudo enviar el mensaje.");
-        return;
-    }
-
-    input.value = "";
-
-    await cargarMensajes();
-}
-
-
-// ===================================
-// ENVIAR CON LA TECLA ENTER
-// ===================================
-
-document.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("mensajeTexto");
-
-    input.addEventListener("keydown", event => {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            enviarMensaje();
-        }
-    });
-});
+    i
