@@ -16,14 +16,12 @@
 </head>
 <body id="body">
     <button id="Cambiar" class="btn seis" onclick="Estilo()">
-            Modo oscuro
-        </button>
+        Modo oscuro
+    </button>
 
     <!-- INICIO -->
     <div id="inicio" class="inicio">
         <h1 class="text">Bienvenido</h1>
-
-        
 
         <button class="btn uno" onclick="AbrirRegister()">
             Registrar
@@ -112,16 +110,33 @@
 
     <!-- HOME -->
     <div id="home">
-        <h2 id="user">Usuario</h2>
-        <h1 class="text">Bienvenido</h1>
+        <div class="perfil-cab">
+            <div id="avatarHome" class="avatar grande"></div>
+            <h2 id="user">Usuario</h2>
+            <p class="suave">Bienvenido de nuevo</p>
+        </div>
 
-        <button class="btn uno" onclick="BtnChat()">
-            Chats
-        </button>
+        <div class="menu">
+            <button class="tile" onclick="BtnChat()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                <span>Chats</span>
+            </button>
 
-        <button class="btn uno" onclick="BtnNotice()">
-            Avisos
-        </button>
+            <button class="tile" onclick="AbrirPublicaciones()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>
+                <span>Publicaciones</span>
+            </button>
+
+            <button class="tile" onclick="BtnNotice()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 21h4"/></svg>
+                <span>Avisos</span>
+            </button>
+
+            <button class="tile" onclick="AbrirAjustes()">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
+                <span>Ajustes</span>
+            </button>
+        </div>
 
         <button id="BtnPush" class="btn ocho" onclick="activarNotificaciones()" style="display: none;">
             Activar notificaciones
@@ -140,6 +155,23 @@
         <div id="contactos">
             <h2 class="text">Contactos</h2>
 
+            <div class="div buscador">
+                <input
+                    id="InputBuscar"
+                    class="input"
+                    type="text"
+                    placeholder="Buscar por nickname"
+                    maxlength="30"
+                    autocomplete="off"
+                >
+
+                <button class="btn uno" onclick="buscarUsuario()">
+                    Buscar
+                </button>
+            </div>
+
+            <div id="resultadosBusqueda"></div>
+
             <div id="listaContactos"></div>
 
             <button class="btn ocho" onclick="volverHome()">
@@ -153,42 +185,142 @@
                 ← Contactos
             </button>
 
-            <h2 id="nombreContacto">Conversación</h2>
+            <div class="chat-cab">
+                <div id="avatarContacto" class="avatar peque"></div>
+                <h2 id="nombreContacto">Conversación</h2>
+            </div>
 
             <div id="mensajes"></div>
 
-            <input
-                id="mensajeTexto"
-                type="text"
-                placeholder="Escribe un mensaje..."
-                maxlength="5000"
-                autocomplete="off"
-            >
+            <input id="InputImagenChat" type="file" accept="image/*" hidden onchange="enviarImagenChat()">
 
-            <button class="btn enviar" onclick="enviarMensaje()">
-                Enviar
+            <div class="enviar-fila">
+                <button id="BtnImagenChat" class="icono-btn" type="button" aria-label="Enviar imagen" onclick="document.getElementById('InputImagenChat').click()">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M4 18l5-5 4 4 3-3 4 4"/></svg>
+                </button>
+
+                <input
+                    id="mensajeTexto"
+                    type="text"
+                    placeholder="Escribe un mensaje..."
+                    maxlength="5000"
+                    autocomplete="off"
+                >
+
+                <button class="btn enviar" onclick="enviarMensaje()">
+                    Enviar
+                </button>
+            </div>
+
+            <button class="link link-peligro" onclick="eliminarContacto()">
+                Eliminar contacto
             </button>
         </div>
 
     </div>
 
 
+    <!-- PUBLICACIONES -->
+    <div id="publicaciones">
+        <h2 class="text">Publicaciones</h2>
+
+        <div class="nueva-pub">
+            <input
+                id="PubTitulo"
+                class="input"
+                type="text"
+                placeholder="Título de la publicación"
+                maxlength="120"
+                autocomplete="off"
+            >
+
+            <input id="PubImagen" type="file" accept="image/*" hidden onchange="vistaPreviaPub()">
+
+            <div id="PubVista"></div>
+
+            <div class="div">
+                <button class="btn ocho" onclick="document.getElementById('PubImagen').click()">
+                    Elegir imagen
+                </button>
+
+                <button id="BtnPublicar" class="btn uno" onclick="publicar()">
+                    Publicar
+                </button>
+            </div>
+        </div>
+
+        <div id="listaPublicaciones"></div>
+
+        <button class="btn ocho" onclick="volverHome()">
+            Volver al inicio
+        </button>
+    </div>
+
+
+    <!-- AJUSTES -->
+    <div id="ajustes">
+        <h2 class="text">Ajustes</h2>
+
+        <div id="ajustesAvatar" class="avatar grande"></div>
+
+        <input id="InputAvatar" type="file" accept="image/*" hidden onchange="cambiarAvatar()">
+
+        <button class="btn uno" onclick="document.getElementById('InputAvatar').click()">
+            Cambiar foto de perfil
+        </button>
+
+        <button id="BtnQuitarAvatar" class="btn ocho" onclick="quitarAvatar()">
+            Quitar foto
+        </button>
+
+        <label class="etiqueta" for="InputNickname">Nickname</label>
+        <input
+            id="InputNickname"
+            class="input"
+            type="text"
+            maxlength="30"
+            autocomplete="nickname"
+        >
+
+        <button class="btn uno" onclick="guardarNickname()">
+            Guardar nickname
+        </button>
+
+        <button class="btn ocho" onclick="volverHome()">
+            Volver al inicio
+        </button>
+    </div>
+
+
     <!-- AVISOS -->
     <div id="notice">
         <h2 class="text">Avisos</h2>
-       <div class="anuncio">
-<h1>Update 0.2 beta</h1>
-<p>mejora de estilo y diseño y agrego de notificaciónes</p>
-</div>
+
+        <div class="anuncio">
+            <h1>Update 0.3 beta</h1>
+            <p>Publicaciones con imágenes y comentarios, imágenes y links en los chats, búsqueda de contactos por nickname, ajustes con foto de perfil y nuevo diseño.</p>
+        </div>
+
+        <div class="anuncio">
+            <h1>Update 0.2 beta</h1>
+            <p>Mejora de estilo y diseño y agregado de notificaciones.</p>
+        </div>
+
         <p>Bienvenido a la aplicación.</p>
 
         <button class="btn ocho" onclick="BtnNotice()">
             Volver
         </button>
     </div>
-<div class="t">
-  <p>Desarrollada por Mister, v0.2 beta</p>
-</div>
+
+    <div class="t">
+        <p>Desarrollada por Mister, v0.3 beta</p>
+    </div>
+
+    <!-- VISOR DE IMÁGENES -->
+    <div id="visor" onclick="cerrarVisor()">
+        <img id="visorImg" alt="">
+    </div>
 
     <!-- SUPABASE Y app.js -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -202,4 +334,5 @@
     </script>
 
 </body>
-</html>
+            </html>
+                    
