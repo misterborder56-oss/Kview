@@ -14,6 +14,7 @@
     --verde: #178a3e;
     --rojo: #d93025;
     --acento-texto: #2d6cdf;
+    --sombra: 0 8px 28px rgba(20, 32, 58, 0.08);
     --radio: 12px;
 }
 
@@ -26,6 +27,7 @@
     --borde: #22305a;
     --burbuja: #1a2748;
     --acento-texto: #7aa7ff;
+    --sombra: none;
     color-scheme: dark;
 }
 
@@ -40,7 +42,7 @@
     background-color: var(--bg);
     color: var(--texto);
     margin: 0 auto;
-    max-width: 440px;
+    max-width: 480px;
     padding: 64px 16px 32px;
     font-family: "Nunito", "Segoe UI", system-ui, sans-serif;
     font-size: 16px;
@@ -51,7 +53,8 @@
 
 /* TEXTOS */
 h1,
-h2 {
+h2,
+h3 {
     margin: 0 0 18px;
     line-height: 1.2;
 }
@@ -63,15 +66,8 @@ h2 { font-size: 1.35rem; }
     text-align: center;
 }
 
-#user {
-    margin-bottom: 4px;
-    font-size: 1rem;
-    font-weight: 600;
+.suave {
     color: var(--suave);
-}
-
-#nombreContacto {
-    margin: 16px 0 8px;
 }
 
 p {
@@ -86,7 +82,9 @@ p {
 #ChatDiv,
 #contactos,
 #Chat,
-#notice {
+#notice,
+#publicaciones,
+#ajustes {
     text-align: center;
 }
 
@@ -95,11 +93,14 @@ p {
 .register,
 #home,
 #ChatDiv,
-#notice {
+#notice,
+#publicaciones,
+#ajustes {
     background-color: var(--card);
     border: 1px solid var(--borde);
-    border-radius: 18px;
+    border-radius: 20px;
     padding: 28px 22px;
+    box-shadow: var(--sombra);
     animation: aparecer 0.22s ease-out;
     transition: background-color 0.25s, border-color 0.25s;
 }
@@ -122,7 +123,9 @@ p {
 #ChatDiv,
 #contactos,
 #Chat,
-#notice {
+#notice,
+#publicaciones,
+#ajustes {
     display: none;
 }
 
@@ -167,6 +170,15 @@ p {
     min-height: 48px;
 }
 
+.etiqueta {
+    display: block;
+    margin: 18px 0 2px;
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--suave);
+}
+
 /* CLASES DE INPUTS */
 .fecha,
 .name,
@@ -207,6 +219,9 @@ p {
 
 /* FOCO VISIBLE (teclado) */
 .btn:focus-visible,
+.tile:focus-visible,
+.link:focus-visible,
+.icono-btn:focus-visible,
 #listaContactos button:focus-visible {
     outline: 3px solid var(--acento-texto);
     outline-offset: 2px;
@@ -260,6 +275,30 @@ p {
     background-color: var(--rojo);
 }
 
+/* botón pequeño */
+.chico {
+    width: auto;
+    margin: 0;
+    padding: 9px 16px;
+    font-size: 0.9rem;
+}
+
+/* botones tipo enlace */
+.link {
+    background: none;
+    border: none;
+    padding: 6px 0;
+    font: inherit;
+    font-weight: 700;
+    color: var(--acento-texto);
+    cursor: pointer;
+}
+
+.link-peligro {
+    color: var(--rojo);
+    font-size: 0.85rem;
+}
+
 /* BOTÓN DE TEMA */
 #Cambiar {
     position: fixed;
@@ -277,10 +316,147 @@ p {
     border-radius: 999px;
 }
 
+/* AVATARES */
+.avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: var(--azul);
+    color: white;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar.peque {
+    width: 34px;
+    height: 34px;
+    font-size: 0.9rem;
+}
+
+.avatar.grande {
+    width: 92px;
+    height: 92px;
+    font-size: 2.2rem;
+}
+
+/* HOME */
+.perfil-cab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.perfil-cab h2,
+.perfil-cab p {
+    margin: 0;
+}
+
+#user {
+    font-size: 1.4rem;
+}
+
+.menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 8px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: var(--campo);
+    color: var(--texto);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, border-color 0.15s;
+}
+
+.tile svg,
+.icono-btn svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: var(--acento-texto);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tile:hover {
+    border-color: var(--azul);
+}
+
+.tile:active {
+    transform: scale(0.97);
+}
+
+/* CONTACTOS: buscador y resultados */
+.buscador {
+    margin-bottom: 8px;
+}
+
+.buscador .input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+
+.buscador .btn {
+    flex: none;
+    width: auto;
+    margin: 0;
+}
+
+.resultado {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 8px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: var(--campo);
+    text-align: left;
+}
+
+.resultado span {
+    flex: 1;
+    min-width: 0;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.resultado small {
+    color: var(--suave);
+}
+
+.vacio {
+    margin: 14px 0;
+    color: var(--suave);
+}
+
 /* LISTA DE CONTACTOS */
 #listaContactos {
     margin-bottom: 8px;
-    color: var(--suave);
 }
 
 #listaContactos button {
@@ -289,7 +465,7 @@ p {
     gap: 12px;
     width: 100%;
     margin: 8px 0;
-    padding: 12px 14px;
+    padding: 10px 14px;
     border: 1px solid var(--borde);
     border-radius: var(--radio);
     background-color: var(--campo);
@@ -302,25 +478,25 @@ p {
     transition: border-color 0.15s, transform 0.1s;
 }
 
-#listaContactos button::before {
-    content: attr(data-inicial);
-    flex: none;
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background-color: var(--azul);
-    color: white;
-    font-weight: 800;
-}
-
 #listaContactos button:hover {
     border-color: var(--azul);
 }
 
 #listaContactos button:active {
     transform: scale(0.99);
+}
+
+/* CABECERA DEL CHAT */
+.chat-cab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 14px 0 8px;
+}
+
+#nombreContacto {
+    margin: 0;
 }
 
 /* MENSAJES */
@@ -347,41 +523,253 @@ p {
 }
 
 /* CADA MENSAJE */
-#mensajes p {
+#mensajes .burbuja {
     width: fit-content;
     max-width: 82%;
     margin: 6px 0;
-    padding: 9px 13px;
+    padding: 8px 12px;
     border-radius: 16px 16px 16px 4px;
     background-color: var(--burbuja);
     color: var(--texto);
     overflow-wrap: anywhere;
 }
 
-#mensajes p.mio {
+#mensajes .burbuja.mio {
     margin-left: auto;
     border-radius: 16px 16px 4px 16px;
     background-color: var(--azul);
     color: white;
 }
 
-/* ESCRIBIR MENSAJES */
-#mensajeTexto {
-    display: inline-block;
-    width: calc(100% - 110px);
+.burbuja p {
     margin: 0;
-    vertical-align: middle;
+}
+
+.burbuja a {
+    color: inherit;
+    text-decoration: underline;
+}
+
+.burbuja img {
+    display: block;
+    max-width: 100%;
+    max-height: 260px;
+    margin-bottom: 6px;
+    border-radius: 10px;
+    cursor: zoom-in;
+}
+
+.burbuja small {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    text-align: right;
+}
+
+/* ESCRIBIR MENSAJES */
+.enviar-fila {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.enviar-fila #mensajeTexto {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    margin: 0;
+}
+
+.icono-btn {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    background-color: var(--campo);
+    cursor: pointer;
+}
+
+.icono-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+.icono-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* BOTÓN ENVIAR */
 .enviar {
-    display: inline-block;
-    width: 92px;
-    margin: 0 0 0 4px;
-    padding: 12px 0;
-    vertical-align: middle;
+    flex: none;
+    width: auto;
+    margin: 0;
+    padding: 12px 16px;
     font-size: 1rem;
     background-color: var(--azul);
+}
+
+/* PUBLICACIONES */
+.nueva-pub {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--borde);
+    text-align: left;
+}
+
+#PubVista img {
+    display: block;
+    width: 100%;
+    max-height: 240px;
+    margin: 8px 0;
+    border-radius: var(--radio);
+    object-fit: cover;
+}
+
+.pub {
+    margin: 14px 0;
+    border: 1px solid var(--borde);
+    border-radius: 16px;
+    background-color: var(--campo);
+    overflow: hidden;
+    text-align: left;
+}
+
+.pub-cab {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+}
+
+.pub-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.2;
+}
+
+.pub-info small {
+    color: var(--suave);
+}
+
+.pub-titulo {
+    margin: 0;
+    padding: 0 14px 10px;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+
+.pub-img {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    object-fit: cover;
+    background-color: var(--burbuja);
+    cursor: zoom-in;
+}
+
+.pub-pie {
+    padding: 6px 14px 10px;
+}
+
+.comentarios {
+    display: none;
+    padding: 0 14px 14px;
+}
+
+.comentarios.abierto {
+    display: block;
+}
+
+.comentario {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 10px 0;
+}
+
+.comentario-cuerpo {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background-color: var(--burbuja);
+    overflow-wrap: anywhere;
+}
+
+.comentario-cuerpo strong {
+    display: block;
+    font-size: 0.85rem;
+}
+
+.comentario-cuerpo a {
+    color: var(--acento-texto);
+}
+
+.comentario-nuevo {
+    margin-top: 10px;
+}
+
+.comentario-nuevo .input {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+
+.comentario-nuevo .btn {
+    flex: none;
+    width: auto;
+    margin: 0;
+}
+
+/* AJUSTES */
+#ajustesAvatar {
+    margin: 0 auto 14px;
+}
+
+/* VISOR DE IMÁGENES */
+#visor {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background-color: rgba(0, 0, 0, 0.88);
+    cursor: zoom-out;
+}
+
+#visor img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+}
+
+/* AVISOS */
+.anuncio {
+    margin: 12px 0;
+    padding: 14px 16px;
+    background-color: var(--campo);
+    border: 1px solid var(--borde);
+    border-radius: var(--radio);
+    text-align: left;
+}
+
+.anuncio h1 {
+    margin: 0 0 6px;
+    font-size: 1.15rem;
+}
+
+.anuncio p {
+    margin: 0;
 }
 
 /* PIE */
@@ -407,7 +795,9 @@ p {
     .register,
     #home,
     #ChatDiv,
-    #notice {
+    #notice,
+    #publicaciones,
+    #ajustes {
         padding: 22px 16px;
     }
 
@@ -432,11 +822,4 @@ p {
         animation: none !important;
         transition: none !important;
     }
-}
-
-
-.anuncio{
-    background-color: var(--campo);
-    border: 1px solid var(--borde);
-    border-radius: var(--radio);
-}
+    }
