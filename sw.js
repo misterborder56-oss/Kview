@@ -1,6 +1,6 @@
 // Service worker: guarda la "carcasa" de la app para que abra rápido y sin conexión.
 // Supabase (login, contactos, mensajes) siempre va por internet.
-const VERSION = "proyect-v2";
+const VERSION = "proyect-v3";
 const ARCHIVOS = [
     "./",
     "./index.html",
@@ -95,3 +95,4 @@ self.addEventListener("notificationclick", evento => {
             })
     );
 });
+                       
